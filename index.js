@@ -1,7 +1,9 @@
 // TODO: Include packages needed for this application
 const fs = require('fs');
 const inquirer = require('inquirer');
-const generateREADME = require('./src/README-template');
+const util = require('util');
+const generateREADME = require('./utils/README-template');
+const writeFile = util.promisify(fs.writeFile);
 
 
 // TODO: Create an array of questions for user input
@@ -60,17 +62,17 @@ const questions = () => {
           }
       },
       {
-        type: 'checkbox',
+        type: 'list',
         name: 'license',
-        message: 'What license does your project use? (Check all that apply)',
-        choices: ['Apache 2.0', 'BSD-3-Clause', 'BSD-2-Clause', 'GPL', 'LGPL', 'MIT', 'Mozilla Public'],
+        message: 'What license does your project use?',
+        choices: ['Apache_2.0', 'BSD_3_Clause', 'BSD_2_Clause', 'GPL', 'LGPL', 'MIT', 'Mozilla_Public'],
       },
       {
         type: 'input',
         name: 'contributions',
         message: 'Who contributed to this project?',
-        validate: contributionInput => {
-            if (contributionInput) {
+        validate: contributionsInput => {
+            if (contributionsInput) {
                 return true;
             } else {
                 console.log('Please enter who contributed!');
@@ -124,9 +126,8 @@ const questions = () => {
 async function init() {
     try {
         const answers = await questions();
-        const generatePage = generateReadme(answers);
 
-        await fs.writeFile('./dist/README.md', generatePage);
+        await writeFile('./dist/README.md', generateREADME(answers));
         console.log('README.md has been created!');
     }   catch(err) {
         console.log(err);
